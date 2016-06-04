@@ -20,19 +20,20 @@ var createMessage = function(userId, message){
     }
 }
 
+var parseUserIdFromInput = function(userId){
+    return userId.substr(1, userId.trim().length-2);
+}
+
 var absentUser = [];
 
 var isUserAvailable = function(userId){
-    console.log(userId);
     return absentUser.filter(function(user){
         return user.id == userId; 
     }).length == 0;
 }
 
-var apiToken = "xoxp-48216674839-48208903350-48220842262-59f8a16744";
-
 var queryUsername = function(userId, callback){      
-    var slack = new Slack(apiToken);
+    var slack = new Slack(token.token_api);
  
     slack.api("users.list", function(err, response) {
         response.members.forEach(function(member){
@@ -46,7 +47,7 @@ var queryUsername = function(userId, callback){
 controller.hears(["check (.*)"], ["direct_message", "direct_mention"], function(bot, message){
     var username = message.match[1]; //username
     console.log(absentUser);
-    if(isUserAvailable(username)){
+    if(isUserAvailable(parseUserIdFromInput(username))){
         bot.reply(message, username + ' is available.');
     } else {
         bot.reply(message, username + ' is not available.');
