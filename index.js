@@ -6,6 +6,9 @@ var controller = Botkit.slackbot();
 var bot = controller.spawn({
   token: token.token
 })
+var _timer;
+
+
 bot.startRTM(function(err,bot,payload) {
   if (err) {
     throw new Error('Could not connect to Slack');
@@ -72,18 +75,29 @@ var createIsAvailableResult = function(userId, isAvailabe){
 
 
 var pokeTarget=function(targetname,user){
-     targetname=targetname.substr(1);
-     var targetMessage={user: targetname};
-    bot.startPrivateConversation(targetMessage,function(response,conversation){
-    queryUsername(user, function(username){
-   conversation.ask("Hey ! "+username+" wants to know if you're available.",function(response,conversation){
-                    console.log(response);
+    targetname=targetname.substr(1);
+    var targetMessage={user: targetname};
+    bot.startPrivateConversation(targetMessage,function(response,convoAsk) {
+    queryUsername(user, function(username) {
 
-                            });
-                     });
-              });
-        };
+    _timer = setTimeout(displayImage, 10000);
 
+    convoAsk.ask("Hey ! "+username+" wants to know if you're available.", function(response,conversation) {
+                cancelTimeout(_timer);
+                console.log(response);
+                convoAsk.stop();
+            });
+        });
+    });
+};
+
+var displayImage = function() {
+    console.log('display TRISTE image here....');
+}
+
+function cancelTimeout(timer) {
+    clearTimeout(timer);
+} 
 
 controller.hears(["check (.*)"], ["direct_message", "direct_mention"], function(bot, message){
     var username = message.match[1]; //username
