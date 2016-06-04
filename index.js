@@ -44,13 +44,37 @@ var queryUsername = function(userId, callback){
     });
 };
 
+var queryUserFromChannel = function(channelId, callback){
+    var slack = new Slack(token.token_api);
+ 
+    slack.api("users.list", {channel: channelId}, function(err, response) {
+        callback(response.members);
+    });
+}
+
+var createIsAvailableResult = function(isAvailabe){
+    if(isAvailabe){
+        return "is available";
+    }
+    else {
+        return "is not available";
+    }
+}
+
 controller.hears(["check (.*)"], ["direct_message", "direct_mention"], function(bot, message){
     var username = message.match[1]; //username
-    console.log(absentUser);
-    if(isUserAvailable(parseUserIdFromInput(username))){
-        bot.reply(message, username + ' is available.');
+    if(username == "all"){
+        var text = "";
+        queryUserFromChannel(message.channel, function(members){
+            members.forEach(function(member){
+                if(!member.is_bot){
+                    text += member.name + " " + createIsAvailableResult(isUserAvailable("@"+member.id)) + "\n";
+                }
+            });
+            return bot.reply(message, text);
+        });
     } else {
-        bot.reply(message, username + ' is not available.');
+        return bot.reply(message, username + createIsAvailableResult(isUserAvailable(parseUserIdFromInput(username))));
     }
 });
 
