@@ -12,6 +12,15 @@ bot.startRTM(function(err,bot,payload) {
   }
 });
 
+// var addReaction = function(name, filename) {
+//     var slack = new Slack(token.token_api);
+    
+//     slack.api("reactions.add", {name: name, file}, function(err, response) {
+//     });
+// }
+
+// addReaction("sad", "sad-valdo.png");
+
 var parseUserIdFromInput = function(userId){
     return userId.substr(1, userId.trim().length-2);
 }
@@ -21,16 +30,10 @@ var absentUserMap = {};
 
 var isUserAvailable = function(userId){
     return !(absentUserMap[userId]) && absentUserMap[userId] != "";
-    // return absentUser.filter(function(user){
-    //     return user.id == userId; 
-    // }).length == 0;
 }
 
 var getReason = function(userId) {
     return absentUserMap[userId];
-    // return absentUser.filter(function(user){
-    //     return user.id == userId; 
-    // })[0].status;
 }
 
 var queryUsername = function(userId, callback){      
@@ -89,7 +92,6 @@ controller.hears(["absent(.*)"], ["direct_message"], function(bot, message){
     var userId = message.user; //UserId
     queryUsername(userId, function(username){
         absentUserMap["@"+userId] = status;
-        // absentUser.push({id:"@"+userId, status: status});
         bot.reply(message, 'Roger that!'); 
     });
 });
@@ -99,6 +101,22 @@ controller.hears(["back"], ["direct_message"], function(bot, message){
     queryUsername(userId, function(username){
         delete absentUserMap["@"+userId];
         console.log(userId);
-        bot.reply(message, 'Yahooo!'); 
+        bot.reply(message, createSadAnswer()); 
     });
 });
+
+var createSadAnswer = function(text){
+    return {
+      text: text,
+      username: "waldo",
+      icon_emoji: ":sad:",
+    }
+}
+
+var createAngryAnswer = function(text){
+    return {
+      text: text,
+      username: "waldo",
+      icon_emoji: ":angry_waldo:",
+    }
+}
