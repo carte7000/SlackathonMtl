@@ -1,0 +1,56 @@
+Features 
+
+
+feature p1: 0) user checks target's availability
+	
+	Description:
+	The user checks the target's availability by calling valdo in private or in channel. Valdo's response gonna be: 
+		1- available* ( see feature 1) 
+		2- not available (display the target's message)
+
+
+feature p1: 1)Valdo pokes the target and return an answer to his invoker
+	
+	Description:
+	Valdo pokes the target to confirm the status. The target has to specify a clear answer so the bot can understand if it's positif answer or a negative one
+
+	scenario 1 : positive response 
+	### valdo's poke:
+	Hey ! @invoker_name wants to know if you're available or not.
+	### target's response:
+	Yes. ${optional_message} // Yes is mandatory
+	
+	scenario 2 : negative response
+	### valdo's poke:
+	(Same as the 1st scenario)
+	### target's response:
+	No. ${optional_message} // No is mandatory
+
+
+feature p2: 2) user checks all the availability of all the users in the current channel
+	-Description:
+	Like the previous feature, but it concerns all the users in the channel beside the caller. Valdo will poke every one of them and return a list of they response.
+	
+	-Sample:
+		@valdo check @here
+		#### valdo'response
+		@user1 : "availibity_status"
+			.
+			.
+			.
+
+
+
+
+feature p3: stat of valdo
+	
+	Description:
+	change the valdo's picture according to the status
+	status {happy, sad , normal}
+
+	scenario:
+	1- reply to valdo -> happy valdo
+	2- do not reply to valdo (for x time) -> sad valdo
+	3- first time you call valdo - normal valdo
+
+
