@@ -70,6 +70,21 @@ var createIsAvailableResult = function(userId, isAvailabe){
     }
 }
 
+
+var pokeTarget=function(targetname,user){
+     targetname=targetname.substr(1);
+     var targetMessage={user: targetname};
+    bot.startPrivateConversation(targetMessage,function(response,conversation){
+    queryUsername(user, function(username){
+   conversation.ask("Hey ! "+username+" wants to know if you're available.",function(response,conversation){
+                    console.log(response);
+
+                            });
+                     });
+              });
+        };
+
+
 controller.hears(["check (.*)"], ["direct_message", "direct_mention"], function(bot, message){
     var username = message.match[1]; //username
     if(username == "all"){
@@ -83,6 +98,10 @@ controller.hears(["check (.*)"], ["direct_message", "direct_mention"], function(
             return bot.reply(message, text);
         });
     } else {
+        var available= isUserAvailable(parseUserIdFromInput(username));
+        if(!available){
+        pokeTarget(parseUserIdFromInput(username),message.user);
+        }
         return bot.reply(message, username + " " + createIsAvailableResult(parseUserIdFromInput(username), isUserAvailable(parseUserIdFromInput(username))));
     }
 });
