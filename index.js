@@ -45,12 +45,21 @@ var queryUsername = function(userId, callback){
 };
 
 controller.hears(["check (.*)"], ["direct_message", "direct_mention"], function(bot, message){
-    var username = message.match[1]; //username
+    var rawUsername = message.match[1]; //username
+    var username=parseUserIdFromInput(rawUsername);
+    username=username.substr(1);
     console.log(absentUser);
-    if(isUserAvailable(parseUserIdFromInput(username))){
-        bot.reply(message, username + ' is available.');
+     var targetMessage={user: username};
+     console.log(targetMessage);
+    bot.startPrivateConversation(targetMessage,function(err,conversation){
+        conversation.say("are u here ");
+    });
+
+    if(isUserAvailable(username)){
+        bot.reply(message,rawUsername + ' is available.');
     } else {
-        bot.reply(message, username + ' is not available.');
+        bot.reply(message, rawUsername + ' is not available.');
+
     }
 });
 
