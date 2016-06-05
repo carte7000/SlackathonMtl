@@ -15,15 +15,6 @@ bot.startRTM(function(err,bot,payload) {
   }
 });
 
-// var addReaction = function(name, filename) {
-//     var slack = new Slack(token.token_api);
-    
-//     slack.api("reactions.add", {name: name, file}, function(err, response) {
-//     });
-// }
-
-// addReaction("sad", "sad-valdo.png");
-
 var parseUserIdFromInput = function(userId){
     return userId.substr(1, userId.trim().length-2);
 }
@@ -33,6 +24,10 @@ var absentUserMap = {};
 
 var isUserAvailable = function(userId){
     return !(absentUserMap[userId]) && absentUserMap[userId] != "";
+}
+
+var isUserInitialize = function(userId){
+    return !(absentUserMap[userId]);
 }
 
 var getReason = function(userId) {
@@ -74,24 +69,37 @@ var createIsAvailableResult = function(userId, isAvailabe){
 }
 
 
-var pokeTarget=function(targetname,user){
+var pokeTarget=function(targetname,user, channel){
     targetname=targetname.substr(1);
     var targetMessage={user: targetname};
     bot.startPrivateConversation(targetMessage,function(response,convoAsk) {
     queryUsername(user, function(username) {
 
-    _timer = setTimeout(displayImage, 10000);
+    _timer = setTimeout(function(){
+        convoAsk.stop();
+        bot.startPrivateConversation(targetMessage,function(response,TEST) {
+            TEST.say(createSadAnswer("Why ignoring me?"));
+            convoAsk.stop();
+            bot.say({channel: channel, text: targetname + "did not answer me."});
+        });
+    }, 3*60000);
 
     convoAsk.ask("Hey ! "+username+" wants to know if you're available.", function(response,conversation) {
                 cancelTimeout(_timer);
-                console.log(response);
                 convoAsk.stop();
+                queryUsername(targetname, function(targetUsername){
+                    bot.startPrivateConversation(targetMessage,function(res,TEST) {
+                        TEST.say("Thank you!");
+                        bot.say({channel: channel, text: targetUsername + " said: " + response.text});
+                    });
+                });
             });
         });
     });
 };
 
 var displayImage = function() {
+    
     console.log('display TRISTE image here....');
 }
 
@@ -99,7 +107,7 @@ function cancelTimeout(timer) {
     clearTimeout(timer);
 } 
 
-controller.hears(["check (.*)"], ["direct_message", "direct_mention"], function(bot, message){
+controller.hears(["find (.*)"], ["direct_message", "direct_mention"], function(bot, message){
     var username = message.match[1]; //username
     if(username == "all"){
         var text = "";
@@ -112,11 +120,16 @@ controller.hears(["check (.*)"], ["direct_message", "direct_mention"], function(
             return bot.reply(message, text);
         });
     } else {
-        var available= isUserAvailable(parseUserIdFromInput(username));
+        var available = isUserAvailable(parseUserIdFromInput(username));
         if(!available){
-        pokeTarget(parseUserIdFromInput(username),message.user);
+            if(isUserInitialize(parseUserIdFromInput(username))){
+                return bot.reply(message, username + " " + createIsAvailableResult(parseUserIdFromInput(username), isUserAvailable(parseUserIdFromInput(username))));       
+            } else {
+                pokeTarget(parseUserIdFromInput(username),message.user, message.channel);
+            }
+        } else {
+             pokeTarget(parseUserIdFromInput(username),message.user, message.channel);
         }
-        return bot.reply(message, username + " " + createIsAvailableResult(parseUserIdFromInput(username), isUserAvailable(parseUserIdFromInput(username))));
     }
 });
 
@@ -134,14 +147,14 @@ controller.hears(["back"], ["direct_message"], function(bot, message){
     queryUsername(userId, function(username){
         delete absentUserMap["@"+userId];
         console.log(userId);
-        bot.reply(message, createSadAnswer()); 
+        bot.reply(message, "Yahoo! I'm happy to see you again."); 
     });
 });
 
 var createSadAnswer = function(text){
     return {
       text: text,
-      username: "waldo",
+      username: "valdo",
       icon_emoji: ":sad:",
     }
 }
@@ -149,7 +162,7 @@ var createSadAnswer = function(text){
 var createAngryAnswer = function(text){
     return {
       text: text,
-      username: "waldo",
+      username: "valdo",
       icon_emoji: ":angry_waldo:",
     }
 }
