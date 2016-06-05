@@ -80,7 +80,7 @@ var pokeTarget=function(targetname,user, channel){
         bot.startPrivateConversation(targetMessage,function(response,TEST) {
             TEST.say(createSadAnswer("Why ignoring me?"));
             convoAsk.stop();
-            bot.say({channel: channel, text: targetname + "did not answer me."});
+            bot.say({channel: channel, text: username + " did not answer me."});
         });
     }, 3*60000);
 
