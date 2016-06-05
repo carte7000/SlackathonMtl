@@ -67,12 +67,18 @@ var createIsAvailableResult = function(userId, isAvailabe){
     }
 }
 
-var pokeTarget=function(username){
-     username=username.substr(1);
-     var targetMessage={user: username};
-    bot.startPrivateConversation(targetMessage,function(err,conversation){
-        conversation.say("are u here ");
-    });
+
+var pokeTarget=function(targetname,user){
+     targetname=targetname.substr(1);
+     var targetMessage={user: targetname};
+    bot.startPrivateConversation(targetMessage,function(response,conversation){
+    queryUsername(user, function(username){
+   conversation.ask("Hey ! "+username+" wants to know if you're available.",function(response,conversation){
+                    console.log(response);
+
+                            });
+                     });
+              });
         };
 
 
@@ -91,7 +97,7 @@ controller.hears(["check (.*)"], ["direct_message", "direct_mention"], function(
     } else {
         var available= isUserAvailable(parseUserIdFromInput(username));
         if(!available){
-        pokeTarget(parseUserIdFromInput(username));
+        pokeTarget(parseUserIdFromInput(username),message.user);
         }
         return bot.reply(message, username + " " + createIsAvailableResult(parseUserIdFromInput(username), isUserAvailable(parseUserIdFromInput(username))));
     }
